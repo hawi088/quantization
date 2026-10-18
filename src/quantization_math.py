@@ -28,7 +28,9 @@ def quantize_affine(
         raise ValueError("qmin must be smaller than qmax")
 
     if not qmin <= 0 <= qmax:
-        raise ValueError("This affine implementation requires qmin <= 0 <= qmax")
+        raise ValueError(
+            "This affine implementation requires qmin <= 0 <= qmax"
+        )
 
     if not torch.isfinite(values).all():
         raise ValueError("values must contain only finite numbers")
@@ -36,41 +38,67 @@ def quantize_affine(
     r_min = values.min().to(torch.float64)
     r_max = values.max().to(torch.float64)
 
-    # Handle constant tensors separately to avoid division by zero.
+    # Handle constant tensors separately.
     if r_min.item() == r_max.item():
         constant = r_min.item()
 
         if constant > 0:
             scale = torch.tensor(
-                constant, dtype=torch.float64, device=values.device
+                constant / qmax,
+                dtype=torch.float64,
+                device=values.device,
             )
-            zero_point = qmax - 1
+            zero_point = 0
             q = torch.full_like(values, qmax, dtype=torch.int64)
 
         elif constant < 0:
             scale = torch.tensor(
-                -constant, dtype=torch.float64, device=values.device
+                constant / qmin,
+                dtype=torch.float64,
+                device=values.device,
             )
-            zero_point = qmin + 1
+            zero_point = 0
             q = torch.full_like(values, qmin, dtype=torch.int64)
 
         else:
             scale = torch.tensor(
-                1.0, dtype=torch.float64, device=values.device
+                1.0,
+                dtype=torch.float64,
+                device=values.device,
             )
             zero_point = 0
             q = torch.zeros_like(values, dtype=torch.int64)
 
         return q, scale, zero_point
 
-    # Ordinary affine min-max quantization.
-    scale = (r_max - r_min) / (qmax - qmin)
+    # Initial scale from the observed range.
+    initial_scale = (r_max - r_min) / (qmax - qmin)
 
+    # Calculate and clamp the zero point.
     zero_point = round(
-        qmin - (r_min / scale).item()
+        qmin - (r_min / initial_scale).item()
     )
     zero_point = max(qmin, min(qmax, zero_point))
 
+    # Adjust the scale to ensure both endpoints fit in the code range.
+    scale_candidates = []
+
+    if r_max.item() > 0 and qmax > zero_point:
+        scale_candidates.append(
+            r_max / (qmax - zero_point)
+        )
+
+    if r_min.item() < 0 and zero_point > qmin:
+        scale_candidates.append(
+            -r_min / (zero_point - qmin)
+        )
+
+    if scale_candidates:
+        scale = torch.stack(scale_candidates).max()
+    else:
+        scale = initial_scale
+
+    # Quantize and clamp codes to the permitted integer range.
     q = torch.round(
         values.to(torch.float64) / scale + zero_point
     )

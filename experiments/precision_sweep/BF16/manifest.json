@@ -1,0 +1,14 @@
+{
+  "model_id": "distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+  "format": "BF16",
+  "quantization": "direct floating-point conversion",
+  "evaluation_dataset": "nyu-mll/glue/sst2",
+  "evaluation_split": "validation",
+  "seed": 42,
+  "max_length": 128,
+  "batch_size": 16,
+  "baseline_accuracy": 0.9105504587155964,
+  "minimum_allowed_accuracy": 0.9005504587155964,
+  "maximum_allowed_artifact_bytes": 107418049.60000001,
+  "custom_loader_required": true
+}

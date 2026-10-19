@@ -1,0 +1,48 @@
+{
+  "project": "Build Your Own Model Quantizer",
+  "model_id": "distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+  "task": "binary sentiment classification",
+  "evaluation": {
+    "dataset": "SST-2 validation split",
+    "examples": 872,
+    "random_seed": 42,
+    "batch_size": 16,
+    "max_sequence_length": 128,
+    "baseline_accuracy_pct": 91.055,
+    "quantized_accuracy_pct": 91.055,
+    "accuracy_loss_percentage_points": 0.0
+  },
+  "quantization": {
+    "candidate": "INT8_AFFINE_per_channel_axis0",
+    "representation": "INT8_AFFINE",
+    "bits": 8,
+    "granularity": "per_channel",
+    "channel_axis": 0,
+    "signed_code_range": [
+      -128,
+      127
+    ],
+    "method": "affine"
+  },
+  "artifact": {
+    "path": "experiments\\artifacts\\all_candidates\\INT8_AFFINE_per_channel_axis0.pt",
+    "size_bytes": 67922211,
+    "size_MB_decimal": 67.922211,
+    "sha256": "701503d0060206a7a9312e1ca3f7e887bcaf2985f59ff1f0b98d527e21d2b0d3"
+  },
+  "baseline_artifact": {
+    "path": "experiments\\artifacts\\all_candidates\\fp32_reference.pt",
+    "size_bytes": 267855089,
+    "size_MB_decimal": 267.855089
+  },
+  "measured_results": {
+    "actual_reduction_pct": 74.6422,
+    "weight_RMSE": 0.00041069182552735397,
+    "relative_weight_RMSE": 0.008064223796585852,
+    "logit_RMSE": 0.039555493149955226,
+    "size_requirement_passed": true,
+    "accuracy_requirement_passed": true,
+    "passes_both": true
+  },
+  "artifact_format_note": "Custom packed checkpoint. This artifact demonstrates storage compression and reconstruction, not native INT8 inference."
+}

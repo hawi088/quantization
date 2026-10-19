@@ -36,20 +36,20 @@ def quantize_symmetric(
     if not torch.isfinite(values).all():
         raise ValueError("values must contain only finite numbers")
 
-    max_abs = values.abs().max().to(torch.float64)
+    max_abs = values.abs().max().to(torch.float32)
 
     # All-zero tensors need no quantization error and would otherwise
     # produce a zero scale.
     if max_abs.item() == 0.0:
         scale = torch.tensor(
-            1.0, dtype=torch.float64, device=values.device
+            1.0, dtype=torch.float32, device=values.device
         )
         q = torch.zeros_like(values, dtype=torch.int64)
         return q, scale
 
     scale = max_abs / qmax
 
-    q = torch.round(values.to(torch.float64) / scale)
+    q = torch.round(values.to(torch.float32) / scale)
     q = q.clamp(qmin, qmax).to(torch.int64)
 
     return q, scale
@@ -69,4 +69,4 @@ def dequantize_symmetric(
     if scale.item() <= 0:
         raise ValueError("scale must be positive")
 
-    return scale * q.to(torch.float64)
+    return scale * q.to(torch.float32)

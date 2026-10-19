@@ -134,7 +134,12 @@ def quantize_state_dict(
             else 0.0
         ),
         "granularity": granularity,
-        "group_size": group_size if granularity == "per_group" else None,
+"channel_axis": (
+    channel_axis if granularity == "per_channel" else None
+),
+"group_size": (
+    group_size if granularity == "per_group" else None
+),
         "quantized_tensor_count": quantized_tensor_count,
         "parameter_set_count": parameter_set_count,
     }

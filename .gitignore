@@ -1,1 +1,16 @@
 baseline_model/
+src/__pycache__/
+
+# Generated candidate checkpoints
+experiments/artifacts/all_candidates/*.pt
+
+# Generated precision-sweep model weights
+experiments/precision_sweep/**/*.pt
+
+# Repeated tokenizer files in generated model folders
+experiments/precision_sweep/**/tokenizer.json
+experiments/precision_sweep/**/tokenizer_config.json
+
+# Python cache files
+__pycache__/
+*.py[cod]

@@ -22,7 +22,7 @@ def quantize_affine(
     if not values.is_floating_point():
         raise TypeError("values must have a floating-point dtype")
 
-    if values.numel() == 0:
+    if values.numel() == 0: #check number of elements in the tensor
         raise ValueError("values must not be empty")
 
     if qmin >= qmax:
@@ -34,18 +34,17 @@ def quantize_affine(
     if not torch.isfinite(values).all():
         raise ValueError("values must contain only finite numbers")
 
-    values64 = values.to(torch.float64)
-    r_min = values64.min()
-    r_max = values64.max()
+    values32 = values.to(torch.float32)
+    r_min = values32.min()
+    r_max = values32.max()
 
-    # A constant tensor has zero range, so the usual scale formula
-    # would divide by zero. Handle this special case separately.
+    # if all elements in a tensor are the same, the resulting scale is zero which casuses division by zero
     if r_min.item() == r_max.item():
         constant = r_min.item()
 
         if constant == 0:
             scale = torch.tensor(
-                1.0, dtype=torch.float64, device=values.device
+                1.0, dtype=torch.float32, device=values.device
             )
             zero_point = 0
             q = torch.zeros_like(values, dtype=torch.int64)
@@ -54,7 +53,7 @@ def quantize_affine(
             q_code = qmax if constant > 0 else qmin
             scale = torch.tensor(
                 constant / q_code,
-                dtype=torch.float64,
+                dtype=torch.float32,
                 device=values.device,
             )
             zero_point = 0
@@ -64,7 +63,7 @@ def quantize_affine(
 
         return q, scale, zero_point
 
-    # 1. Scale: use the formula from training exactly.
+    # 1. Scale: use the formula
     scale = (r_max - r_min) / (qmax - qmin)
 
     # 2. Zero point: derive it from the minimum endpoint.
@@ -73,7 +72,7 @@ def quantize_affine(
     )
 
     # 3. Quantize, round, and clamp to the integer range.
-    q = torch.round(values64 / scale + zero_point)
+    q = torch.round(values32 / scale + zero_point)
     q = q.clamp(qmin, qmax).to(torch.int64)
 
     return q, scale, zero_point

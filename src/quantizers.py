@@ -248,7 +248,7 @@ def quantize_tensor(
 
     if granularity == "per_channel":
         if values.ndim < 2:
-            # Existing policy: vectors use per-tensor quantization.
+            # if the diamention is less than 2, there will be no channel so we apply per tensor 
             return quantize_tensor(
                 values, bits, method, "per_tensor", axis, group_size
             )

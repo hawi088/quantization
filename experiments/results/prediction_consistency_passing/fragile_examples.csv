@@ -1,0 +1,7 @@
+example_index,sentence,true_label,fp32_prediction,fp32_correct,fp32_margin,configs_that_flip,share_of_configs_pct
+492,it has all the excitement of eating oatmeal . ,0,0,True,0.14165279269218445,4,44.44444444444444
+242,"... mafia , rap stars and hood rats butt their ugly heads in a regurgitation of cinematic violence that gives brutal birth to an unlikely , but likable , hero . ' ",1,1,True,0.09960158169269562,3,33.33333333333333
+764,"the x potion gives the quickly named blossom , bubbles and buttercup supernatural powers that include extraordinary strength and laser-beam eyes , which unfortunately do n't enable them to discern flimsy screenplays . ",0,0,True,0.06417347490787506,2,22.22222222222222
+274,"the jabs it employs are short , carefully placed and dead-center . ",1,1,True,0.37278881669044495,2,22.22222222222222
+599,the overall effect is less like a children 's movie than a recruitment film for future hollywood sellouts . ,0,0,True,0.1098208948969841,1,11.11111111111111
+311,"though perry and hurley make inspiring efforts to breathe life into the disjointed , haphazard script by jay scherick and david ronn , neither the actors nor director reginald hudlin can make it more than fitfully entertaining . ",0,1,False,0.6805769205093384,1,11.11111111111111

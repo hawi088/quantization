@@ -1,0 +1,22 @@
+{
+  "candidate": "INT8_AFFINE_per_channel_axis0",
+  "dataset": "GLUE SST-2 validation",
+  "examples": 872,
+  "baseline_accuracy_pct": 91.05504751205444,
+  "quantized_accuracy_pct": 91.05504751205444,
+  "accuracy_change_pp": 0.0,
+  "changed_predictions": 0,
+  "changed_prediction_pct": 0.0,
+  "both_correct": 794,
+  "fp32_correct_int8_wrong": 0,
+  "fp32_wrong_int8_correct": 0,
+  "both_wrong": 78,
+  "logit_RMSE": 0.039555493149955226,
+  "logit_MAE": 0.018756717336663137,
+  "maximum_absolute_logit_error": 0.5233258605003357,
+  "floating_point_parameter_count": 66955010,
+  "weight_MAE": 0.0003258500080880192,
+  "weight_RMSE": 0.00041069182552735397,
+  "relative_weight_RMSE": 0.008064223796585852,
+  "maximum_absolute_weight_error": 0.023828469216823578
+}

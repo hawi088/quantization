@@ -14,3 +14,4 @@ experiments/precision_sweep/**/tokenizer_config.json
 # Python cache files
 __pycache__/
 *.py[cod]
+hf_release/

@@ -1,4 +1,3 @@
-
 import csv
 import gc
 import time
@@ -23,8 +22,11 @@ OUTPUT_PATH = RESULTS_DIR / "granularity_comparison.csv"
 
 BATCH_SIZE = 16
 MAX_LENGTH = 128
-SIZE_REDUCTION_TARGET = 60.0
+
+# Passing conditions
+SIZE_REDUCTION_TARGET = 70.0     # was 60.0
 MAX_ACCURACY_LOSS_PP = 1.0
+MAX_LOGIT_RMSE = 0.2            # new: maximum allowed logit RMSE vs FP32
 
 BIT_WIDTHS = (8, 4, 2)
 METHODS = ("SYM", "AFFINE")
@@ -49,6 +51,9 @@ CSV_FIELDS = [
     "ms_per_example",
     "quantized_tensor_count",
     "parameter_set_count",
+    "size_pass",
+    "accuracy_pass",
+    "logit_pass",
     "meets_targets",
 ]
 
@@ -166,6 +171,10 @@ def main():
     print("  2 floating-point references")
     print("  36 integer quantization experiments")
     print("Device: CPU")
+    print("\nPassing conditions:")
+    print(f"  Size reduction   >= {SIZE_REDUCTION_TARGET:.1f}%")
+    print(f"  Accuracy loss    <= {MAX_ACCURACY_LOSS_PP:.2f} pp")
+    print(f"  Logit RMSE       <= {MAX_LOGIT_RMSE:.3f}")
 
     source = str(BASELINE_DIR) if BASELINE_DIR.exists() else MODEL_ID
 
@@ -273,10 +282,11 @@ def main():
             logit_difference.square().mean().item()
         ) ** 0.5
 
-        qualifies = (
-            size_reduction_pct >= SIZE_REDUCTION_TARGET
-            and accuracy_loss_pp <= MAX_ACCURACY_LOSS_PP
-        )
+        size_pass = size_reduction_pct >= SIZE_REDUCTION_TARGET
+        accuracy_pass = accuracy_loss_pp <= MAX_ACCURACY_LOSS_PP
+        logit_pass = logit_rmse <= MAX_LOGIT_RMSE
+
+        qualifies = size_pass and accuracy_pass and logit_pass
 
         row = {
             "candidate": candidate,
@@ -294,9 +304,7 @@ def main():
             ),
             "weight_MAE": metrics["weight_mae"],
             "weight_RMSE": metrics["weight_rmse"],
-            "relative_weight_RMSE": (
-    metrics["relative_weight_rmse"]
-),
+            "relative_weight_RMSE": metrics["relative_weight_rmse"],
             "logit_RMSE": logit_rmse,
             "evaluation_seconds": round(evaluation_seconds, 4),
             "ms_per_example": round(
@@ -306,6 +314,9 @@ def main():
                 metrics["quantized_tensor_count"]
             ),
             "parameter_set_count": metrics["parameter_set_count"],
+            "size_pass": size_pass,
+            "accuracy_pass": accuracy_pass,
+            "logit_pass": logit_pass,
             "meets_targets": qualifies,
         }
 
@@ -329,7 +340,12 @@ def main():
             f"Evaluation time: "
             f"{row['evaluation_seconds']:.2f} seconds"
         )
-        print(f"Meets preliminary targets: {qualifies}")
+        print(
+            f"Size pass: {size_pass} | "
+            f"Accuracy pass: {accuracy_pass} | "
+            f"Logit pass: {logit_pass}"
+        )
+        print(f"Meets targets: {qualifies}")
 
         del candidate_state, logits
         gc.collect()
